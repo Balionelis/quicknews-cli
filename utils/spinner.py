@@ -3,7 +3,7 @@ import time
 import itertools
 from concurrent.futures import ThreadPoolExecutor
 
-# Shows some animation thing
+# Shows animation while loading
 def loading_animation(duration=5):
     spinner = itertools.cycle(['-', '/', '|', '\\'])
     end_time = time.time() + duration

@@ -5,6 +5,7 @@ from utils.spinner import run_with_spinner
 from services.news_service import fetch_news, extract_titles, format_titles_for_ai
 from services.ai_service import setup_gemini, get_ai_selection, parse_ai_selection
 from models.article import extract_article_data
+#TODO: Add unit tests
 
 # Dumps it to a file
 def save_news_to_file(top_news, filename=OUTPUT_FILE):
@@ -29,7 +30,7 @@ def main():
     
     articles = fetch_news(query)
     if not articles:
-        print(f"No news about {query}")
+        print(f"No news found about {query}")
         sys.exit(0)
     
     titles = extract_titles(articles)

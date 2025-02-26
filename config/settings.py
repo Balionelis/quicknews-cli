@@ -1,5 +1,5 @@
-NEWSAPI_KEY = 'your_newsapi_key_here'
-GEMINI_API_KEY = 'your_gemini_api_key_here'
+NEWSAPI_KEY = '09d0b5e8ff024c74b74ebd4ae3c933db'
+GEMINI_API_KEY = 'AIzaSyDhVvINPZxKOy7Os7Kll40qdmgDkYX8-24'
 
 OUTPUT_FILE = 'top5_news.json'
 MAX_ARTICLES = 10
