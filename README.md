@@ -73,6 +73,9 @@ GEMINI_API_KEY = 'your_gemini_api_key_here'
 3. Titles are sent to **Google's Gemini AI** to select the most relevant/interesting articles
 4. The **TOP 5** articles are displayed in the terminal and saved to a **JSON** file
 
+## Testing
+If you want to run tests you can view this **[FILE](https://github.com/Balionelis/quicknews/blob/main/TESTING.md)** for instructions
+
 ## License
 
 This project is licensed under the **MIT License** - see the **[LICENSE](https://github.com/Balionelis/quicknews/blob/main/LICENSE)** file for details.
