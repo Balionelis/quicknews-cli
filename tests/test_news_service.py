@@ -10,9 +10,11 @@ from services.news_service import fetch_news, extract_titles, format_titles_for_
 
 class TestNewsService(unittest.TestCase):
     
+    @patch('os.environ.get')
     @patch('services.news_service.requests.get')
-    def test_fetch_news_success(self, mock_get):
-        # Mock successful response
+    def test_fetch_news_success(self, mock_get, mock_env_get):
+        mock_env_get.return_value = 'fake-api-key'
+        
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {

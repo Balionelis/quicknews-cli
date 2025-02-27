@@ -10,13 +10,18 @@ from services.ai_service import setup_gemini, get_ai_selection, parse_ai_selecti
 
 class TestAIService(unittest.TestCase):
     
+    @patch('os.environ.get')
     @patch('services.ai_service.genai')
-    def test_setup_gemini_success(self, mock_genai):
+    def test_setup_gemini_success(self, mock_genai, mock_env_get):
+        mock_env_get.return_value = 'fake-api-key'
+        
         setup_gemini()
         mock_genai.configure.assert_called_once()
-    
+
+    @patch('os.environ.get')
     @patch('services.ai_service.genai')
-    def test_setup_gemini_failure(self, mock_genai):
+    def test_setup_gemini_failure(self, mock_genai, mock_env_get):
+        mock_env_get.return_value = 'fake-api-key'
         mock_genai.configure.side_effect = Exception("API Error")
         
         with self.assertRaises(SystemExit):

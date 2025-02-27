@@ -1,5 +1,9 @@
-NEWSAPI_KEY = 'your_newsapi_key_here'
-GEMINI_API_KEY = 'your_gemini_api_key_here'
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+NEWSAPI_KEY = os.environ.get('NEWSAPI_KEY')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
 OUTPUT_FILE = 'top5_news.json'
 MAX_ARTICLES = 10

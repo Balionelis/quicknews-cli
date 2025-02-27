@@ -1,4 +1,7 @@
 import unittest
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="google._upb._message")
 
 def run_all_tests():
     # Discover and run all tests
