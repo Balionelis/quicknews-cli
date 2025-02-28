@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import os
+import requests
 
 # Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -38,6 +39,32 @@ class TestNewsService(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.status_code = 401
         mock_get.return_value = mock_response
+        
+        with self.assertRaises(SystemExit):
+            fetch_news('test query')
+    
+    @patch('services.news_service.requests.get')
+    def test_fetch_news_rate_limit(self, mock_get):
+        # Mock rate limit response
+        mock_response = MagicMock()
+        mock_response.status_code = 429
+        mock_get.return_value = mock_response
+        
+        with self.assertRaises(SystemExit):
+            fetch_news('test query')
+    
+    @patch('services.news_service.requests.get')
+    def test_fetch_news_timeout(self, mock_get):
+        # Mock timeout
+        mock_get.side_effect = requests.exceptions.Timeout("Connection timed out")
+        
+        with self.assertRaises(SystemExit):
+            fetch_news('test query')
+    
+    @patch('services.news_service.requests.get')
+    def test_fetch_news_connection_error(self, mock_get):
+        # Mock connection error
+        mock_get.side_effect = requests.exceptions.ConnectionError("Connection refused")
         
         with self.assertRaises(SystemExit):
             fetch_news('test query')
