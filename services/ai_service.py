@@ -15,7 +15,7 @@ def setup_gemini():
 # Uses the AI model to pick news with retry logic
 def get_ai_selection(query, titles_text, max_retries=3, retry_delay=2):
     try:
-        model = genai.GenerativeModel("gemini-1.0-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         
         # A better prompt for more reliable responses
         ai_prompt = ( 

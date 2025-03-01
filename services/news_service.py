@@ -7,7 +7,6 @@ from config.settings import NEWSAPI_KEY, MAX_ARTICLES
 def fetch_news(query, timeout=10):
     yesterday = date.today() - timedelta(days=1)
     news_url = f"https://newsapi.org/v2/everything?q={query}&from={yesterday}&sortBy=relevancy&language=en&apiKey={NEWSAPI_KEY}"
-    print(f"Getting news about {query}...")
     
     try:
         response = requests.get(news_url, timeout=timeout)
