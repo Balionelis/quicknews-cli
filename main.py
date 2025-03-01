@@ -1,6 +1,5 @@
 import json
 import sys
-import time
 from config.settings import TOP_ARTICLES, OUTPUT_FILE
 from utils.spinner import run_with_spinner
 from services.news_service import fetch_news, extract_titles, format_titles_for_ai
@@ -30,7 +29,7 @@ def main():
         
         query = input('What do you want to hear about? ')
         
-        # Fetch news with spinner
+        # Fetch news
         articles = run_with_spinner(f"Fetching news about '{query}'", fetch_news, query)
         
         if not articles:

@@ -4,7 +4,6 @@ import sys
 import os
 import json
 
-# Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from main import save_news_to_file, display_news, main

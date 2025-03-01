@@ -4,7 +4,6 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="google._upb._message")
 
 def run_all_tests():
-    # Discover and run all tests
     loader = unittest.TestLoader()
     start_dir = '.'
     suite = loader.discover(start_dir)

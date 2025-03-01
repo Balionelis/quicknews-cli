@@ -3,7 +3,6 @@ from unittest.mock import patch, MagicMock
 import sys
 import os
 
-# Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.ai_service import setup_gemini, get_ai_selection, parse_ai_selection

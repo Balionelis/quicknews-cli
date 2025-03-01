@@ -12,12 +12,11 @@ def setup_gemini():
         print("Please check your API key and internet connection.")
         sys.exit(1)
 
-# Uses the AI model to pick news with retry logic
+# Promts AI
 def get_ai_selection(query, titles_text, max_retries=3, retry_delay=2):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         
-        # A better prompt for more reliable responses
         ai_prompt = ( 
             f"I have a list of news headlines related to '{query}'.\n\n"
             f"Here are the headlines:\n{titles_text}\n\n"
@@ -53,7 +52,7 @@ def parse_ai_selection(ai_answer, titles_length, top_count=5):
             if item.isdigit():
                 num = int(item)
                 if 1 <= num <= titles_length:
-                    picked_numbers.append(num - 1)  # convert to 0-index
+                    picked_numbers.append(num - 1)
         
         if len(picked_numbers) == 0 or len(picked_numbers) > top_count:
             picked_numbers = list(range(min(top_count, titles_length)))
@@ -61,5 +60,4 @@ def parse_ai_selection(ai_answer, titles_length, top_count=5):
         return picked_numbers[:top_count]
     except Exception as e:
         print(f"Error parsing AI selection: {str(e)}")
-        # Fallback to default selection
         return list(range(min(top_count, titles_length)))

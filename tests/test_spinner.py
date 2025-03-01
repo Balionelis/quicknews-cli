@@ -4,7 +4,6 @@ import sys
 import os
 import threading
 
-# Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.spinner import Spinner, run_with_spinner

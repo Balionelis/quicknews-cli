@@ -4,7 +4,6 @@ import sys
 import os
 import requests
 
-# Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.news_service import fetch_news, extract_titles, format_titles_for_ai

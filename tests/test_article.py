@@ -2,7 +2,6 @@ import unittest
 import sys
 import os
 
-# Add the parent directory to sys.path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models.article import Article, extract_article_data
