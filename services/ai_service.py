@@ -36,6 +36,7 @@ def get_ai_selection(query, titles_text, max_retries=3, retry_delay=2):
                     print("Using default selection instead.")
                     return "1,2,3,4,5"
                 print(f"AI request failed, retrying ({retries}/{max_retries})...")
+                # print(f"Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
         
     except Exception as e:

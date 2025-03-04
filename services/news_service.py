@@ -10,7 +10,6 @@ def fetch_news(query, timeout=10):
     
     try:
         response = requests.get(news_url, timeout=timeout)
-        
         if response.status_code == 429:
             print("Rate limit exceeded for NewsAPI. Please try again later.")
             sys.exit(1)

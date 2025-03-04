@@ -11,7 +11,6 @@ def save_news_to_file(top_news, filename=OUTPUT_FILE):
         news_data = [article.to_dict() for article in top_news]
         with open(filename, 'w') as f:
             json.dump(news_data, f, indent=4)
-        print(f"Saved to {filename}")
     except Exception as e:
         print(f"Error saving news to file: {str(e)}")
 
@@ -30,7 +29,7 @@ def main():
         query = input('What do you want to hear about? ')
         
         # Fetch news
-        articles = run_with_spinner(f"Fetching news about '{query}'", fetch_news, query)
+        articles = run_with_spinner(f"Fetching news about {query}", fetch_news, query)
         
         if not articles:
             print(f"No news found about '{query}'")
@@ -59,7 +58,7 @@ def main():
     
         save_news_to_file(top_news)
         display_news(top_news)
-        print("✓ A total of", len(top_news), "news articles were saved to top5_news.json")
+        print("✓ A total of", len(top_news), f"news articles were saved to {OUTPUT_FILE}")
         print("✓ Complete!")
         
     except KeyboardInterrupt:
