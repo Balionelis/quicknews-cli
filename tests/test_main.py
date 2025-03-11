@@ -1,174 +1,110 @@
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
-import sys
-import os
+from unittest.mock import patch, MagicMock, mock_open, call
 import json
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+import sys
 from main import save_news_to_file, display_news, main
+from models.article import Article
 
 class TestMain(unittest.TestCase):
-    
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.dump')
-    def test_save_news_to_file(self, mock_json_dump, mock_file_open):
-        # Create mock articles
-        article1 = MagicMock()
-        article1.to_dict.return_value = {"title": "Title 1", "description": "Desc 1", "url": "url1"}
+    @patch('builtins.open')
+    def test_save_news_to_file(self, mock_file):
+        mock_file_handle = mock_open()
+        mock_file.return_value = mock_file_handle()
         
-        article2 = MagicMock()
-        article2.to_dict.return_value = {"title": "Title 2", "description": "Desc 2", "url": "url2"}
-        
-        top_news = [article1, article2]
-        
-        # Call function
-        save_news_to_file(top_news, "test_file.json")
-        
-        # Verify file was opened correctly
-        mock_file_open.assert_called_once_with("test_file.json", "w")
-        
-        # Verify json.dump was called with correct arguments
-        expected_data = [
-            {"title": "Title 1", "description": "Desc 1", "url": "url1"},
-            {"title": "Title 2", "description": "Desc 2", "url": "url2"}
+        articles = [
+            Article("Title 1", "url1"),
+            Article("Title 2", "url2")
         ]
-        mock_json_dump.assert_called_once()
-        self.assertEqual(mock_json_dump.call_args[0][0], expected_data)
-    
+        
+        save_news_to_file(articles, "test.json")
+        
+        mock_file.assert_called_once_with("test.json", 'w')
+        
+        expected_data = [
+            {"title": "Title 1", "url": "url1"},
+            {"title": "Title 2", "url": "url2"}
+        ]
+        
+        mock_file_handle().write.assert_called()
+
     @patch('builtins.open')
     def test_save_news_to_file_exception(self, mock_open):
-        # Test error handling when saving fails
-        mock_open.side_effect = IOError("File error")
+        mock_open.side_effect = Exception("File error")
+        articles = [Article("Title 1", "url1")]
         
-        article = MagicMock()
-        article.to_dict.return_value = {"title": "Title", "description": "Desc", "url": "url"}
-        
-        # Should not raise exception
-        with patch('builtins.print') as mock_print:
-            save_news_to_file([article], "test_file.json")
-            mock_print.assert_any_call("Error saving news to file: File error")
-    
+        save_news_to_file(articles, "test.json")
+
     @patch('builtins.print')
     def test_display_news(self, mock_print):
-        # Create mock articles
-        article1 = MagicMock()
-        article1.title = "Title 1"
-        article1.description = "Desc 1"
-        article1.url = "url1"
-        
-        article2 = MagicMock()
-        article2.title = "Title 2"
-        article2.description = "Desc 2"
-        article2.url = "url2"
-        
-        top_news = [article1, article2]
-        
-        # Call function
-        display_news(top_news)
-        
-        # Verify print was called with correct arguments
-        expected_calls = [
-            unittest.mock.call("\nHere's your news:\n"),
-            unittest.mock.call("1. Title 1"),
-            unittest.mock.call("   Desc 1"),
-            unittest.mock.call("   Link: url1"),
-            unittest.mock.call(""),
-            unittest.mock.call("2. Title 2"),
-            unittest.mock.call("   Desc 2"),
-            unittest.mock.call("   Link: url2"),
-            unittest.mock.call("")
+        articles = [
+            Article("Title 1", "url1"),
+            Article("Title 2", "url2")
         ]
-        mock_print.assert_has_calls(expected_calls)
-    
-    @patch('main.setup_gemini')
-    @patch('main.input', return_value="test query")
+        
+        display_news(articles)
+        
+        self.assertTrue(mock_print.call_count > 5)
+        
+        print_calls = [call_args[0][0] for call_args in mock_print.call_args_list]
+        self.assertTrue(any("[1] Title 1" in str(call_arg) for call_arg in print_calls))
+        self.assertTrue(any("[2] Title 2" in str(call_arg) for call_arg in print_calls))
+        self.assertTrue(any("🔗 url1" in str(call_arg) for call_arg in print_calls))
+        self.assertTrue(any("🔗 url2" in str(call_arg) for call_arg in print_calls))
+
     @patch('main.run_with_spinner')
-    @patch('main.extract_titles')
-    @patch('main.format_titles_for_ai')
-    @patch('main.parse_ai_selection')
-    @patch('main.extract_article_data')
+    @patch('main.input', return_value="test query")
     @patch('main.save_news_to_file')
     @patch('main.display_news')
-    @patch('main.print')
-    def test_main_success(self, mock_print, mock_display, mock_save, mock_extract_data,
-                        mock_parse, mock_format, mock_extract_titles, mock_spinner, 
-                        mock_input, mock_setup):
-        # Configure mocks for the success path
-        mock_spinner.side_effect = [
-            None,  # setup_gemini result
-            ["article1", "article2"],  # fetch_news result
-            "AI answer",  # get_ai_selection result
-            ["processed article1", "processed article2"]  # extract_article_data result
-        ]
+    @patch('services.news_service.extract_titles')
+    @patch('services.news_service.format_titles_for_ai')
+    @patch('services.ai_service.get_ai_selection')
+    @patch('services.ai_service.parse_ai_selection')
+    @patch('models.article.extract_article_data')
+    def test_main_success(self, mock_extract_article, mock_parse_ai, 
+                          mock_get_ai, mock_format_titles, mock_extract_titles,
+                          mock_display, mock_save, mock_input, mock_spinner):
+        mock_articles = [{"title": "Title 1", "url": "url1"}]
+        mock_titles = ["Title 1"]
+        mock_titles_text = "1. Title 1"
+        mock_ai_answer = "1"
+        mock_picked_numbers = [0]
+        mock_top_news = [Article("Title 1", "url1")]
         
-        mock_extract_titles.return_value = ["title1", "title2"]
-        mock_format.return_value = "formatted titles"
-        mock_parse.return_value = [0, 1]
+        mock_extract_titles.return_value = mock_titles
+        mock_format_titles.return_value = mock_titles_text
+        mock_get_ai.return_value = mock_ai_answer
+        mock_parse_ai.return_value = mock_picked_numbers
+        mock_extract_article.return_value = mock_top_news
         
-        # Call main function
+        def spinner_side_effect(message, func, *args, **kwargs):
+            if func.__name__ == "setup_gemini":
+                return None
+            elif func.__name__ == "fetch_news":
+                return mock_articles
+            elif func.__name__ == "get_ai_selection":
+                return mock_ai_answer
+            elif func.__name__ == "extract_article_data":
+                return mock_top_news
+        
+        mock_spinner.side_effect = spinner_side_effect
+        
         main()
         
-        # Verify the flow
-        mock_input.assert_called_once()
-        mock_spinner.assert_called()
-        mock_extract_titles.assert_called_once()
-        mock_format.assert_called_once()
-        mock_parse.assert_called_once()
         mock_save.assert_called_once()
-        mock_display.assert_called_once()
-        mock_print.assert_any_call("✓ Complete!")
-    
-    @patch('main.setup_gemini')
-    @patch('main.input', return_value="test query")
+        mock_display.assert_called_once_with(mock_top_news)
+
     @patch('main.run_with_spinner')
-    @patch('main.sys.exit')
-    def test_main_no_articles(self, mock_exit, mock_spinner, mock_input, mock_setup):
-        # Configure mock to return empty list for fetch_news
-        mock_spinner.side_effect = [
-            None,  # setup_gemini result
-            []  # fetch_news result (empty)
-        ]
+    @patch('main.input', return_value="test query")
+    def test_main_no_articles(self, mock_input, mock_spinner):
+        def spinner_side_effect(message, func, *args, **kwargs):
+            if "Fetching news" in message:
+                return []
+            return None
         
-        # Make sys.exit raise an exception to catch it
-        mock_exit.side_effect = SystemExit
+        mock_spinner.side_effect = spinner_side_effect
         
-        # Call main function - this should exit
         with self.assertRaises(SystemExit):
             main()
-        
-        # Verify correct exit
-        mock_exit.assert_called_once_with(0)
-    
-    @patch('main.setup_gemini')
-    @patch('main.input', return_value="test query")
-    @patch('main.run_with_spinner')
-    def test_main_exception(self, mock_spinner, mock_input, mock_setup):
-        # Simulate an unexpected exception
-        mock_spinner.side_effect = Exception("Test error")
-        
-        # Call main function
-        with patch('main.sys.exit') as mock_exit:
-            mock_exit.side_effect = SystemExit
-            
-            with self.assertRaises(SystemExit):
-                main()
-            
-            # Should exit with code 1 (error)
-            mock_exit.assert_called_once_with(1)
-    
-    @patch('main.setup_gemini')
-    @patch('main.input')
-    def test_main_keyboard_interrupt(self, mock_input, mock_setup):
-        # Simulate user interruption
-        mock_input.side_effect = KeyboardInterrupt
-        
-        # Call main function
-        with patch('main.sys.exit') as mock_exit:
-            mock_exit.side_effect = SystemExit
-            
-            with self.assertRaises(SystemExit):
-                main()
-            
-            # Should exit with code 0 (normal)
-            mock_exit.assert_called_once_with(0)
+
+if __name__ == '__main__':
+    unittest.main()

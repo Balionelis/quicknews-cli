@@ -15,11 +15,13 @@ def save_news_to_file(top_news, filename=OUTPUT_FILE):
         print(f"Error saving news to file: {str(e)}")
 
 def display_news(top_news):
-    print("\nHere's your news:\n")
+    print("\n┌───────────────────────────────────────────────")
+    print("│ 📰 TOP 5 NEWS RESULTS")
+    print("└───────────────────────────────────────────────\n")
+    
     for i, item in enumerate(top_news):
-        print(f"{i+1}. {item.title}")
-        print(f"   {item.description}")
-        print(f"   Link: {item.url}")
+        print(f"[{i+1}] {item.title}")
+        print(f"    🔗 {item.url}")
         print("")
 
 def main():
@@ -58,7 +60,7 @@ def main():
     
         save_news_to_file(top_news)
         display_news(top_news)
-        print("✓ A total of", len(top_news), f"news articles were saved to {OUTPUT_FILE}")
+        print(f"✓ {len(top_news)} news articles saved to {OUTPUT_FILE}")
         print("✓ Complete!")
         
     except KeyboardInterrupt:

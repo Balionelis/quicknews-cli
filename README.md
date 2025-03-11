@@ -1,6 +1,6 @@
 # QuickNews
 
-A lightweight CLI tool that fetches, filters, and displays personalized news using AI curation. Combines NewsAPI and Gemini AI to deliver your top 5 relevant news articles in seconds.
+A lightweight CLI tool that fetches, filters, and displays personalized news using AI curation. Combines Google News RSS feeds and Gemini AI to deliver your top 5 relevant news articles in seconds.
 
 ![License](https://img.shields.io/github/license/Balionelis/quicknews)
 ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
@@ -57,15 +57,14 @@ quicknews/
 ```
 
 ## Configuration
-Before using QuickNews, you need to obtain API keys for:
-1. **[NewsAPI](https://newsapi.org/)** - Free tier available
-2. **[Google Generative AI (Gemini)](https://ai.google.dev/)** - Free tier available
+Before using QuickNews, you need to obtain an API key for:
+
+1. **[Google Generative AI (Gemini)](https://ai.google.dev/)** - Free tier available
 
 QuickNews uses environment variables to securely manage API keys:
 
 1. Create a `.env` file in the project root directory:
     ```bash
-    NEWSAPI_KEY=your_actual_newsapi_key_here
     GEMINI_API_KEY=your_actual_gemini_api_key_here
     ```
 2. This file is automatically excluded from Git via `.gitignore` to prevent accidentally exposing your API keys.
@@ -74,7 +73,6 @@ QuickNews uses environment variables to securely manage API keys:
 
 For developers and contributors, an `.env.example` file is provided with placeholders:
 ```
-NEWSAPI_KEY=your_newsapi_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 This approach keeps your API keys secure while making the setup process clear for other users.
@@ -82,7 +80,7 @@ This approach keeps your API keys secure while making the setup process clear fo
 
 ## How It Works
 1. User inputs a topic of interest
-2. The app fetches recent news articles about that topic from **NewsAPI**
+2. The app fetches recent news articles about that topic from **Google News RSS feeds**
 3. Titles are sent to **Google's Gemini AI** to select the most relevant/interesting articles
 4. The **TOP 5** articles are displayed in the terminal and saved to a **JSON** file
 

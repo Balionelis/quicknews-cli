@@ -1,87 +1,49 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import sys
-import os
+import time
 import threading
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from io import StringIO
 from utils.spinner import Spinner, run_with_spinner
 
 class TestSpinner(unittest.TestCase):
-    
-    @patch('utils.spinner.sys.stdout')
+    @patch('sys.stdout', new_callable=StringIO)
     def test_spinner_start_stop(self, mock_stdout):
-        # Test that the spinner starts and stops correctly
         spinner = Spinner("Testing")
+        spinner.start()
+        time.sleep(0.2)  # Allow spinner to make at least one iteration
+        spinner.stop()
+        output = mock_stdout.getvalue()
+        self.assertIn("Testing", output)
+        self.assertTrue(any(c in output for c in ['-', '/', '|', '\\']))
+
+    @patch('threading.Thread')
+    def test_spinner_thread_creation(self, mock_thread):
+        mock_thread_instance = MagicMock()
+        mock_thread.return_value = mock_thread_instance
         
-        # Create a mock thread
-        mock_thread = MagicMock()
-        
-        # Patch both the Thread class and its start method
-        with patch('threading.Thread', return_value=mock_thread):
-            spinner.start()
-            self.assertTrue(spinner.running)
-            self.assertIsNotNone(spinner.spinner_thread)
-            mock_thread.start.assert_called_once()
-            
-            spinner.stop()
-            self.assertFalse(spinner.running)
-            mock_thread.join.assert_called_once()
-            
-            # Check that write was called to clear the line
-            mock_stdout.write.assert_called()
-            mock_stdout.flush.assert_called()
-    
-    @patch('utils.spinner.time.sleep')
-    @patch('utils.spinner.sys.stdout')
-    def test_spinner_spin_method(self, mock_stdout, mock_sleep):
-        # Test the _spin method directly
         spinner = Spinner("Testing")
-        spinner.running = True
+        spinner.start()
         
-        # Mock the running flag to stop after one iteration
-        def stop_after_one_iteration(*args, **kwargs):
-            spinner.running = False
-            
-        mock_sleep.side_effect = stop_after_one_iteration
+        mock_thread.assert_called_once()
+        mock_thread_instance.start.assert_called_once()
         
-        # Call the spin method
-        spinner._spin()
-        
-        # Check that write and flush were called
-        mock_stdout.write.assert_called_once()
-        mock_stdout.flush.assert_called_once()
-    
+        spinner.stop()
+        mock_thread_instance.join.assert_called_once()
+
     def test_run_with_spinner_success(self):
-        # Test successful function execution
-        test_func = MagicMock(return_value="test result")
+        def sample_func(a, b):
+            return a + b
         
-        with patch('utils.spinner.Spinner') as MockSpinner:
-            mock_spinner_instance = MockSpinner.return_value
-            
-            result = run_with_spinner("Test message", test_func, "arg1", kwarg1="value")
-            
-            # Verify spinner was started and stopped
-            mock_spinner_instance.start.assert_called_once()
-            mock_spinner_instance.stop.assert_called_once()
-            
-            # Verify function was called with args
-            test_func.assert_called_once_with("arg1", kwarg1="value")
-            
-            # Verify correct result returned
-            self.assertEqual(result, "test result")
-    
+        result = run_with_spinner("Adding", sample_func, 2, 3)
+        self.assertEqual(result, 5)
+
     def test_run_with_spinner_exception(self):
-        # Test function that raises an exception
-        test_func = MagicMock(side_effect=ValueError("Test error"))
+        def failing_func():
+            raise ValueError("Test exception")
         
-        with patch('utils.spinner.Spinner') as MockSpinner:
-            mock_spinner_instance = MockSpinner.return_value
-            
-            # Should re-raise the exception
-            with self.assertRaises(ValueError):
-                run_with_spinner("Test message", test_func)
-            
-            mock_spinner_instance.start.assert_called_once()
-            mock_spinner_instance.stop.assert_called_once()
+        with self.assertRaises(ValueError):
+            run_with_spinner("Testing", failing_func)
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,30 +1,44 @@
 import sys
 import requests
-from datetime import date, timedelta
-from config.settings import NEWSAPI_KEY, MAX_ARTICLES
+from bs4 import BeautifulSoup
+import urllib.parse
+from datetime import datetime, timedelta
+from config.settings import MAX_ARTICLES
 
-# Gets the news
 def fetch_news(query, timeout=10):
-    yesterday = date.today() - timedelta(days=1)
-    news_url = f"https://newsapi.org/v2/everything?q={query}&from={yesterday}&sortBy=relevancy&language=en&apiKey={NEWSAPI_KEY}"
+    query = urllib.parse.quote_plus(query)
+    today = datetime.now().strftime('%Y-%m-%d')
+    url = f"https://news.google.com/rss/search?q={query}+after:{today}&hl=en-US&gl=US&ceid=US:en"
     
     try:
-        response = requests.get(news_url, timeout=timeout)
-        if response.status_code == 429:
-            print("Rate limit exceeded for NewsAPI. Please try again later.")
-            sys.exit(1)
+        response = requests.get(url, timeout=timeout)
         
         if response.status_code != 200:
             print(f"Error getting news: {response.status_code}")
-            if response.status_code == 401:
-                print("API key may be invalid or expired.")
             sys.exit(1)
         
-        news_data = response.json()
-        return news_data.get("articles", [])
+        soup = BeautifulSoup(response.content, 'xml')
+        items = soup.find_all('item')
+        
+        articles = []
+        for item in items:
+            title = item.title.text if item.title else "No title"
+            link = item.link.text if item.link else "#"
+            pub_date = item.pubDate.text if item.pubDate else ""
+            
+            parsed_url = urllib.parse.urlparse(link)
+            clean_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+            
+            articles.append({
+                "title": title,
+                "url": clean_url,
+                "publishedAt": pub_date
+            })
+        
+        return articles
     
     except requests.exceptions.Timeout:
-        print("Request to NewsAPI timed out. Please check your internet connection and try again.")
+        print("Request to Google News timed out. Please check your internet connection and try again.")
         sys.exit(1)
     except requests.exceptions.ConnectionError:
         print("Connection error. Please check your internet connection and try again.")
@@ -33,7 +47,6 @@ def fetch_news(query, timeout=10):
         print(f"Unexpected error fetching news: {str(e)}")
         sys.exit(1)
 
-# Gets the titles
 def extract_titles(articles):
     titles = []
     for i in range(min(MAX_ARTICLES, len(articles))):
@@ -41,6 +54,5 @@ def extract_titles(articles):
     
     return titles
 
-# Makes a list for the AI
 def format_titles_for_ai(titles):
     return "\n".join(f"{i+1}. {title}" for i, title in enumerate(titles))
