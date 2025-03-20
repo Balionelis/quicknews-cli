@@ -45,7 +45,7 @@ quicknews/
 │
 ├── services/
 │   ├── __init__.py
-│   ├── news_service.py   # News API integration
+│   ├── news_service.py   # Google News RSS integration
 │   └── ai_service.py     # Gemini AI integration
 │
 ├── models/
