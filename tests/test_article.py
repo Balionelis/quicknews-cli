@@ -42,7 +42,7 @@ class TestArticle(unittest.TestCase):
             {"title": "Title 2", "url": "url2"},
         ]
         
-        picked_numbers = [0, 2, 3]  # 2 and 3 are out of range
+        picked_numbers = [0, 2, 3]
         result = extract_article_data(articles, picked_numbers)
         
         self.assertEqual(len(result), 1)

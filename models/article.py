@@ -19,3 +19,12 @@ def extract_article_data(articles, picked_numbers):
                 article.get("url", "#")
             ))
     return top_news
+
+def format_selected_titles(articles, picked_numbers):
+    selected_titles = []
+    for i, index in enumerate(picked_numbers):
+        if index < len(articles):
+            title = articles[index].get("title", "No title")
+            selected_titles.append(f"{i+1}. {title}")
+    
+    return "\n".join(selected_titles)
