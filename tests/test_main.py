@@ -58,16 +58,15 @@ class TestMain(unittest.TestCase):
     @patch('models.article.extract_article_data')
     @patch('models.article.format_selected_titles')
     @patch('services.ai_service.get_ai_satisfaction')
-    def test_main_success(self, mock_get_satisfaction, mock_format_selected, 
-                          mock_extract_article, mock_display, mock_save, 
-                          mock_input, mock_spinner):
+    def test_main_success(self, mock_get_satisfaction, mock_format_selected,
+                         mock_extract_article, mock_display, mock_save,
+                         mock_input, mock_spinner):
         mock_articles = [{"title": "Title 1", "url": "url1"}]
         mock_titles = ["Title 1"]
         mock_titles_text = "1. Title 1"
         mock_ai_answer = "1"
         mock_picked_numbers = [0]
         mock_top_news = [Article("Title 1", "url1")]
-        mock_selected_titles = "Selected: Title 1"
         mock_satisfaction = 85
         
         def spinner_side_effect(message, func, *args, **kwargs):

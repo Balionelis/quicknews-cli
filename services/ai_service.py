@@ -73,17 +73,17 @@ def get_ai_selection(query, titles_text, max_retries=3, retry_delay=2):
 def get_ai_satisfaction(query, selected_titles, max_retries=3, retry_delay=2):
     default_satisfaction = 85
     
+    ai_prompt = (
+        f"You selected the following headlines for the query '{query}':\n\n"
+        f"{selected_titles}\n\n"
+        f"On a scale from 0% to 100%, how satisfied are you with these selections in terms of relevance and importance?\n"
+        f"Please respond with just a percentage number (e.g., 85) and nothing else."
+    )
+    
     try:
         with contextlib.redirect_stderr(io.StringIO()):
             model = genai.GenerativeModel("gemini-2.0-flash")
-        
-        ai_prompt = (
-            f"You selected the following headlines for the query '{query}':\n\n"
-            f"{selected_titles}\n\n"
-            f"On a scale from 0% to 100%, how satisfied are you with these selections in terms of relevance and importance?\n"
-            f"Please respond with just a percentage number (e.g., 85) and nothing else."
-        )
-        
+            
         for retry in range(max_retries):
             try:
                 with contextlib.redirect_stderr(io.StringIO()):
@@ -93,15 +93,13 @@ def get_ai_satisfaction(query, selected_titles, max_retries=3, retry_delay=2):
                 if result and 0 <= int(result) <= 100:
                     return int(result)
                 return default_satisfaction
-            except Exception as e:
+            except Exception:
                 if retry >= max_retries - 1:
-                    print(f"Failed to get AI satisfaction after {max_retries} attempts: {str(e)}")
-                    return default_satisfaction
+                    break
                 print(f"AI satisfaction request failed, retrying ({retry+1}/{max_retries})...")
                 time.sleep(retry_delay)
-        
-    except Exception:
-        print(f"Error with Gemini API during satisfaction check")
+    except Exception as e:
+        print(f"Error with Gemini API during satisfaction check: {e}")
         
     return default_satisfaction
 

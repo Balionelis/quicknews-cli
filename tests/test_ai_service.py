@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import os
 import io
 import sys
-from services.ai_service import setup_gemini, get_ai_selection, get_ai_satisfaction, cleanup_gemini
+from services.ai_service import setup_gemini, get_ai_selection, get_ai_satisfaction
 
 class TestAIService(unittest.TestCase):
     @patch('atexit.register')
