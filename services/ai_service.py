@@ -71,6 +71,8 @@ def get_ai_selection(query, titles_text, max_retries=3, retry_delay=2):
         return "1,2,3,4,5"
 
 def get_ai_satisfaction(query, selected_titles, max_retries=3, retry_delay=2):
+    default_satisfaction = 85
+    
     try:
         with contextlib.redirect_stderr(io.StringIO()):
             model = genai.GenerativeModel("gemini-2.0-flash")
@@ -82,8 +84,7 @@ def get_ai_satisfaction(query, selected_titles, max_retries=3, retry_delay=2):
             f"Please respond with just a percentage number (e.g., 85) and nothing else."
         )
         
-        retries = 0
-        while retries < max_retries:
+        for retry in range(max_retries):
             try:
                 with contextlib.redirect_stderr(io.StringIO()):
                     response = model.generate_content(ai_prompt)
@@ -91,18 +92,18 @@ def get_ai_satisfaction(query, selected_titles, max_retries=3, retry_delay=2):
                 result = ''.join(c for c in result if c.isdigit())
                 if result and 0 <= int(result) <= 100:
                     return int(result)
-                return 85
+                return default_satisfaction
             except Exception as e:
-                retries += 1
-                if retries >= max_retries:
+                if retry >= max_retries - 1:
                     print(f"Failed to get AI satisfaction after {max_retries} attempts: {str(e)}")
-                    return 85
-                print(f"AI satisfaction request failed, retrying ({retries}/{max_retries})...")
+                    return default_satisfaction
+                print(f"AI satisfaction request failed, retrying ({retry+1}/{max_retries})...")
                 time.sleep(retry_delay)
         
-    except Exception as e:
-        print(f"Error with Gemini API during satisfaction check: {e}")
-        return 85
+    except Exception:
+        print(f"Error with Gemini API during satisfaction check")
+        
+    return default_satisfaction
 
 def parse_ai_selection(ai_answer, titles_length, top_count=5):
     try:

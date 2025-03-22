@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import os
 import io
 import sys
-from services.ai_service import setup_gemini, get_ai_selection, parse_ai_selection, cleanup_gemini, get_ai_satisfaction
+from services.ai_service import setup_gemini, get_ai_selection, get_ai_satisfaction, cleanup_gemini
 
 class TestAIService(unittest.TestCase):
     @patch('atexit.register')
@@ -75,4 +75,4 @@ class TestAIService(unittest.TestCase):
         mock_model.generate_content.side_effect = [Exception("API Error"), MagicMock(text="90")]
         mock_gen_model.return_value = mock_model
         
-        result = get_ai_satisfaction
+        self.assertEqual(get_ai_satisfaction("test query", "1. Title 1", max_retries=2, retry_delay=0), 90)

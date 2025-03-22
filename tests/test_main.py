@@ -55,16 +55,12 @@ class TestMain(unittest.TestCase):
     @patch('main.input', return_value="test query")
     @patch('main.save_news_to_file')
     @patch('main.display_news')
-    @patch('services.news_service.extract_titles')
-    @patch('services.news_service.format_titles_for_ai')
-    @patch('services.ai_service.get_ai_selection')
-    @patch('services.ai_service.parse_ai_selection')
     @patch('models.article.extract_article_data')
     @patch('models.article.format_selected_titles')
     @patch('services.ai_service.get_ai_satisfaction')
-    def test_main_success(self, mock_get_satisfaction, mock_format_selected, mock_extract_article, 
-                          mock_parse_ai, mock_get_ai, mock_format_titles, mock_extract_titles,
-                          mock_display, mock_save, mock_input, mock_spinner):
+    def test_main_success(self, mock_get_satisfaction, mock_format_selected, 
+                          mock_extract_article, mock_display, mock_save, 
+                          mock_input, mock_spinner):
         mock_articles = [{"title": "Title 1", "url": "url1"}]
         mock_titles = ["Title 1"]
         mock_titles_text = "1. Title 1"
@@ -73,14 +69,6 @@ class TestMain(unittest.TestCase):
         mock_top_news = [Article("Title 1", "url1")]
         mock_selected_titles = "Selected: Title 1"
         mock_satisfaction = 85
-        
-        mock_extract_titles.return_value = mock_titles
-        mock_format_titles.return_value = mock_titles_text
-        mock_get_ai.return_value = mock_ai_answer
-        mock_parse_ai.return_value = mock_picked_numbers
-        mock_extract_article.return_value = mock_top_news
-        mock_format_selected.return_value = mock_selected_titles
-        mock_get_satisfaction.return_value = mock_satisfaction
         
         def spinner_side_effect(message, func, *args, **kwargs):
             if func.__name__ == "setup_gemini":
@@ -97,7 +85,12 @@ class TestMain(unittest.TestCase):
         
         mock_spinner.side_effect = spinner_side_effect
         
-        main()
+        with patch('services.news_service.extract_titles', return_value=mock_titles), \
+             patch('services.news_service.format_titles_for_ai', return_value=mock_titles_text), \
+             patch('services.ai_service.get_ai_selection', return_value=mock_ai_answer), \
+             patch('services.ai_service.parse_ai_selection', return_value=mock_picked_numbers):
+            
+            main()
         
         mock_save.assert_called_once_with(mock_top_news, satisfaction=mock_satisfaction)
         mock_display.assert_called_once_with(mock_top_news, satisfaction=mock_satisfaction)
