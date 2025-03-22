@@ -30,7 +30,7 @@ class TestNewsService(unittest.TestCase):
         self.assertEqual(len(articles), 2)
         self.assertEqual(articles[0]["title"], "Test Title 1")
         self.assertEqual(articles[0]["url"], "http://example.com/1")
-        self.assertEqual(articles[1]["url"], "http://example.com/2")  # Params should be removed
+        self.assertEqual(articles[1]["url"], "http://example.com/2")
 
     @patch('requests.get')
     def test_fetch_news_http_error(self, mock_get):

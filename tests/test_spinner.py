@@ -11,7 +11,7 @@ class TestSpinner(unittest.TestCase):
     def test_spinner_start_stop(self, mock_stdout):
         spinner = Spinner("Testing")
         spinner.start()
-        time.sleep(0.2)  # Allow spinner to make at least one iteration
+        time.sleep(0.2)
         spinner.stop()
         output = mock_stdout.getvalue()
         self.assertIn("Testing", output)
